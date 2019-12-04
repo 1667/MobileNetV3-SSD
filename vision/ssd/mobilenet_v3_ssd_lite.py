@@ -6,6 +6,7 @@ from ..nn.mobilenet_v3 import MobileNetV3
 
 from .ssd import SSD, GraphPath
 from .predictor import Predictor
+from .onnxpred import OnnxPredictor
 from .config import mobilenetv1_ssd_config as config
 
 
@@ -89,6 +90,17 @@ def create_mobilenetv3_ssd_lite(num_classes, width_mult=1.0, is_test=False):
 
 def create_mobilenetv3_ssd_lite_predictor(net, candidate_size=200, nms_method=None, sigma=0.5, device=None):
     predictor = Predictor(net, config.image_size, config.image_mean,
+                          config.image_std,
+                          nms_method=nms_method,
+                          iou_threshold=config.iou_threshold,
+                          candidate_size=candidate_size,
+                          sigma=sigma,
+                          device=device)
+    return predictor
+
+
+def create_onnx_mobilenetv3_ssd_lite_predictor(net, candidate_size=200, nms_method=None, sigma=0.5, device=None):
+    predictor = OnnxPredictor(net, config.image_size, config.image_mean,
                           config.image_std,
                           nms_method=nms_method,
                           iou_threshold=config.iou_threshold,

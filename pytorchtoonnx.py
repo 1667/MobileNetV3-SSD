@@ -4,14 +4,18 @@ from vision.ssd.mobilenetv1_ssd_lite import create_mobilenetv1_ssd_lite, create_
 from vision.ssd.squeezenet_ssd_lite import create_squeezenet_ssd_lite, create_squeezenet_ssd_lite_predictor
 from vision.ssd.mobilenet_v2_ssd_lite import create_mobilenetv2_ssd_lite, create_mobilenetv2_ssd_lite_predictor
 from vision.utils.misc import Timer
+from vision.ssd.config import mobilenetv1_ssd_config as config
+from torchsummary import summary
 import cv2
 import sys
 import time,os
 
-from vision.ssd.mobilenet_v3_ssd_lite import create_mobilenetv3_ssd_lite,create_mobilenetv3_ssd_lite_predictor
+import torch.onnx
 
-if len(sys.argv) < 5:
-    print('Usage: python run_ssd_example.py <net type>  <model path> <label path> <image path>')
+from vision.ssd.mobilenet_v3_ssd_lite import create_mobilenetv3_ssd_lite,create_mobilenetv3_ssd_lite_predictor,create_onnx_mobilenetv3_ssd_lite_predictor
+
+if len(sys.argv) < 4:
+    print('Usage: python run_ssd_example.py <net type>  <model path> <label path>')
     sys.exit(0)
 net_type = sys.argv[1]
 model_path = sys.argv[2]
@@ -32,12 +36,23 @@ elif net_type == 'sq-ssd-lite':
     net = create_squeezenet_ssd_lite(len(class_names), is_test=True)
 elif net_type == 'mb3-ssd-lite':
     net = create_mobilenetv3_ssd_lite(len(class_names), is_test=True)
+elif net_type == 'onnx_mb3-ssd-lite':
+    net = create_mobilenetv3_ssd_lite(len(class_names), is_test=True)
 
 else:
     print("The net type is wrong. It should be one of vgg16-ssd, mb1-ssd and mb1-ssd-lite.")
     sys.exit(1)
 net.load(model_path)
 
+# summary(net.cuda(),(3,300,300))
+
+# dummy_input = torch.randn(1, 3, config.image_size, config.image_size)
+
+# torch_out = torch.onnx._export(net,             # model being run
+#                                dummy_input,                       # model input (or a tuple for multiple inputs)
+#                                "mobilenet_v3_ssd_lite.onnx", # where to save the model (can be a file or file-like object)
+#                                verbose=False,
+#                                export_params=True)      # store the trained parameter weights inside the model file
 if net_type == 'vgg16-ssd':
     predictor = create_vgg_ssd_predictor(net, candidate_size=200)
 elif net_type == 'mb1-ssd':
@@ -50,6 +65,8 @@ elif net_type == 'sq-ssd-lite':
     predictor = create_squeezenet_ssd_lite_predictor(net, candidate_size=200)
 elif net_type == 'mb3-ssd-lite':
     predictor = create_mobilenetv3_ssd_lite_predictor(net, candidate_size=200)
+elif net_type == 'onnx_mb3-ssd-lite':
+    predictor = create_onnx_mobilenetv3_ssd_lite_predictor(net, candidate_size=200)
 else:
     predictor = create_vgg_ssd_predictor(net, candidate_size=200)
 
@@ -70,6 +87,6 @@ for i in range(boxes.size(0)):
                 2)  # line type
 outputdir = "./outputtest/"
 
-path = outputdir+"output_"+str(time.time())+".jpg"
+path = outputdir+"output_onnx_2.jpg"
 cv2.imwrite(path, orig_image)
 print(f"Found {len(probs)} objects. The output image is {path}")

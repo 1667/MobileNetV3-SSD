@@ -213,6 +213,10 @@ class ToTensor(object):
     def __call__(self, cvimage, boxes=None, labels=None):
         return torch.from_numpy(cvimage.astype(np.float32)).permute(2, 0, 1), boxes, labels
 
+class ToONNXTensor(object):
+    def __call__(self, cvimage, boxes=None, labels=None):
+        return torch.from_numpy(cvimage.astype(np.float32)), boxes, labels
+    
 
 class RandomSampleCrop(object):
     """Crop

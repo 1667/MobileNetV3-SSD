@@ -1,0 +1,2 @@
+#!/bin/bash
+python run_ssd_example.py mb3-ssd-lite models/mb3-ssd-lite-Epoch-100-Loss-2.933042128880819.pth models/voc-model-labels.txt /home/grobot/mywork/deeplearning/myyolo/yolov3/data/samples/123.jpeg
