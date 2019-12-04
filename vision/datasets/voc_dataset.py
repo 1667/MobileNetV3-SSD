@@ -14,13 +14,18 @@ class VOCDataset:
             root: the root of the VOC2007 or VOC2012 dataset, the directory contains the following sub-directories:
                 Annotations, ImageSets, JPEGImages, SegmentationClass, SegmentationObject.
         """
+        # print("path ===="+root)
         self.root = pathlib.Path(root)
         self.transform = transform
         self.target_transform = target_transform
+        # if is_test:
+        #     image_sets_file = self.root / "ImageSets/Main/test.txt"
+        # else:
+        #     image_sets_file = self.root / "ImageSets/Main/trainval.txt"
         if is_test:
             image_sets_file = self.root / "ImageSets/Main/test.txt"
         else:
-            image_sets_file = self.root / "ImageSets/Main/trainval.txt"
+            image_sets_file = self.root / "ImageSets/Main/train.txt"
         self.ids = VOCDataset._read_image_ids(image_sets_file)
         self.keep_difficult = keep_difficult
 
